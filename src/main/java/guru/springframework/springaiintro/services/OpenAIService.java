@@ -1,6 +1,7 @@
 package guru.springframework.springaiintro.services;
 
 import guru.springframework.springaiintro.model.Answer;
+import guru.springframework.springaiintro.model.Capital;
 import guru.springframework.springaiintro.model.GetCapitalRequest;
 import guru.springframework.springaiintro.model.Question;
 
@@ -8,6 +9,8 @@ import guru.springframework.springaiintro.model.Question;
  * Created by jt, Spring Framework Guru.
  */
 public interface OpenAIService {
+
+    Answer getCapitalJsonFormat(Capital capital);
 
     Answer getCapitalWithInfo(GetCapitalRequest getCapitalRequest);
 
