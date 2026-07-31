@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import guru.springframework.springaiintro.model.Answer;
 import guru.springframework.springaiintro.model.Capital;
+import guru.springframework.springaiintro.model.CapitalRequest;
+import guru.springframework.springaiintro.model.CapitalResposeRecord;
 import guru.springframework.springaiintro.model.GetCapitalRequest;
 import guru.springframework.springaiintro.model.Question;
 import guru.springframework.springaiintro.services.OpenAIService;
@@ -20,6 +22,11 @@ public class QuestionController {
 
     public QuestionController(OpenAIService openAIService) {
         this.openAIService = openAIService;
+    }
+
+    @PostMapping("/capitalJsonBean")
+    public CapitalResposeRecord getCapitalJsonBean(@RequestBody CapitalRequest capitalRequest) throws IOException {
+        return openAIService.getCapitalInJsonBean(capitalRequest);
     }
 
     @PostMapping("/capitalJson")
@@ -45,4 +52,9 @@ public class QuestionController {
     public String askQuestion(@RequestBody String getRequest){
         return openAIService.getAnswer(getRequest);
     }
+
+//    @PostMapping("/travellingDestinationOfferInfo")
+//    public DesinationInfoResponse getTravellingDestinationOffer(@RequestBody DestinationInfoRequest destinationInfoRequest){
+//
+//    }
 }

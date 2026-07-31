@@ -1,1 +1,1 @@
-What is the capital of {{stateOrCountry}}? Respond in JSON format without markdown tags with the name of city  in a property named 'answer'.
+What is the capital of {stateOrCountry}? Respond in JSON format without markdown tags with the name of city  in a property named 'answer'.
