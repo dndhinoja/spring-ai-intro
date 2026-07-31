@@ -3,19 +3,29 @@ package guru.springframework.springaiintro.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.input.Prompt;
+import dev.langchain4j.model.input.PromptTemplate;
 import guru.springframework.springaiintro.model.Answer;
 import guru.springframework.springaiintro.model.Capital;
 import guru.springframework.springaiintro.model.GetCapitalRequest;
 import guru.springframework.springaiintro.model.Question;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.PromptTemplate;
+//import org.springframework.ai.chat.model.ChatModel;
+//import org.springframework.ai.chat.model.ChatResponse;
+//import org.springframework.ai.chat.prompt.Prompt;
+//import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
 
 /**
@@ -24,9 +34,9 @@ import java.util.Map;
 @Service
 public class OpenAIServiceImpl implements OpenAIService {
 
-    private final ChatModel chatModel;
+    private final ChatLanguageModel chatModel;
 
-    public OpenAIServiceImpl(ChatModel chatModel) {
+    public OpenAIServiceImpl(ChatLanguageModel chatModel) {
         this.chatModel = chatModel;
     }
 
@@ -43,13 +53,19 @@ public class OpenAIServiceImpl implements OpenAIService {
     ObjectMapper objectMapper;
 
     @Override
-    public Answer getCapitalJsonFormat(Capital capital) {
-        PromptTemplate promptTemplate = new PromptTemplate(getCapitalPromptJson);
-        Prompt prompt = promptTemplate.create(Map.of("stateOrCountry", capital.getStateOrCountry()));
-        ChatResponse response = chatModel.call(prompt);
+    public Answer getCapitalJsonFormat(Capital capital) throws IOException {
+//        PromptTemplate promptTemplate = new PromptTemplate(getCapitalPromptJson);
+        File file = ResourceUtils.getFile(getCapitalPromptJson.getURI());
+        String templateText = Files.readString(file.toPath());
+        PromptTemplate promptTemplate = PromptTemplate.from(templateText);
+//        Prompt prompt = promptTemplate.create(Map.of("stateOrCountry", capital.getStateOrCountry()));
+        Prompt prompt = promptTemplate.apply(Map.of("stateOrCountry", capital.getStateOrCountry()));
+//        ChatResponse response = chatModel.call(prompt);
+        ChatResponse chatResponse = chatModel.chat(prompt.toUserMessage());
         String jsonString = "";
         try {
-            JsonNode jsonNode = objectMapper.readTree(response.getResult().getOutput().getText());
+            //JsonNode jsonNode = objectMapper.readTree(response.getResult().getOutput().getText());
+            JsonNode jsonNode = objectMapper.readTree(chatResponse.aiMessage().text());
             if(!jsonNode.isNull())
                 jsonString = jsonNode.get("answer").toString();
         } catch (JsonProcessingException e){
@@ -59,40 +75,63 @@ public class OpenAIServiceImpl implements OpenAIService {
     }
 
     @Override
-    public Answer getCapitalWithInfo(GetCapitalRequest getCapitalRequest) {
-        PromptTemplate promptTemplate = new PromptTemplate(getCapitalPromptWithInfo);
-        Prompt prompt = promptTemplate.create(Map.of("stateOrCountry", getCapitalRequest.stateOrCountry()));
-        System.out.println("sevice...capitalinfo");
-        ChatResponse response = chatModel.call(prompt);
+    public Answer getCapitalWithInfo(GetCapitalRequest getCapitalRequest) throws IOException {
+//        PromptTemplate promptTemplate = new PromptTemplate(getCapitalPromptWithInfo);
+        File file = ResourceUtils.getFile(getCapitalPromptWithInfo.getURL());
+        String templateText = Files.readString(file.toPath());
+        PromptTemplate promptTemplate = PromptTemplate.from(templateText);
+//        Prompt prompt = promptTemplate.create(Map.of("stateOrCountry", getCapitalRequest.stateOrCountry()));
+        Prompt prompt = promptTemplate.apply(Map.of("stateOrCountry", getCapitalRequest.stateOrCountry()));
 
-        return new Answer(response.getResult().getOutput().getText());
+//        System.out.println("sevice...capitalinfo");
+//        ChatResponse response = chatModel.call(prompt);
+        ChatResponse chatResponse = chatModel.chat(prompt.toUserMessage());
+//        return new Answer(response.getResult().getOutput().getText());
+        return new Answer(chatResponse.aiMessage().text());
     }
 
     @Override
-    public Answer getCapital(GetCapitalRequest getCapitalRequest) {
-        PromptTemplate promptTemplate = new PromptTemplate(getCapitalPrompt);
-        Prompt prompt = promptTemplate.create(Map.of("stateOrCountry", getCapitalRequest.stateOrCountry()));
-        ChatResponse response = chatModel.call(prompt);
+    public Answer getCapital(GetCapitalRequest getCapitalRequest) throws IOException {
+//        PromptTemplate promptTemplate = new PromptTemplate(getCapitalPrompt);
+        File file = ResourceUtils.getFile("classpath:templates/get-capital-prompt.st");
 
-        return new Answer(response.getResult().getOutput().getText());
+        // 2. Read the raw text template from the file
+        String templateText = Files.readString(file.toPath());
+
+        // 3. Initialize the LangChain4j template
+        PromptTemplate promptTemplate = PromptTemplate.from(templateText);
+//        Prompt prompt = promptTemplate.create(Map.of("stateOrCountry", getCapitalRequest.stateOrCountry()));
+        Prompt prompt = promptTemplate.apply(Map.of("stateOrCountry", getCapitalRequest.stateOrCountry()));
+//        ChatResponse response = chatModel.call(prompt);
+        ChatResponse chatResponse = chatModel.chat(prompt.toUserMessage());
+//        return new Answer(response.getResult().getOutput().getText());
+        return new Answer(chatResponse.aiMessage().text());
     }
+
     @Override
     public Answer getAnswer(Question question) {
         System.out.println("I was called");
 
+        //PromptTemplate promptTemplate = new PromptTemplate(question.question());
         PromptTemplate promptTemplate = new PromptTemplate(question.question());
-        Prompt prompt = promptTemplate.create();
-        ChatResponse response = chatModel.call(prompt);
+        //Prompt prompt = promptTemplate.create();
+        Prompt prompt = promptTemplate.apply(Map.of());
+        //ChatResponse response = chatModel.call(prompt);
+        ChatResponse response = chatModel.chat(prompt.toUserMessage());
 
-        return new Answer(response.getResult().getOutput().getText());
+        //return new Answer(response.getResult().getOutput().getText());
+        return new Answer(response.aiMessage().text());
     }
 
     @Override
     public String getAnswer(String question) {
         PromptTemplate promptTemplate = new PromptTemplate(question);
-        Prompt prompt = promptTemplate.create();
-        ChatResponse response = chatModel.call(prompt);
+        //Prompt prompt = promptTemplate.create();
+        Prompt prompt = promptTemplate.apply(Map.of());
+        //ChatResponse response = chatModel.call(prompt);
+        ChatResponse chatResponse = chatModel.chat(prompt.toUserMessage());
 
-        return response.getResult().getOutput().getText();
+        //return response.getResult().getOutput().getText();
+        return chatResponse.aiMessage().text();
     }
 }

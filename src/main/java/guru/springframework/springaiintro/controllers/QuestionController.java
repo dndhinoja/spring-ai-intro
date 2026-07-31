@@ -1,5 +1,7 @@
 package guru.springframework.springaiintro.controllers;
 
+import java.io.IOException;
+
 import guru.springframework.springaiintro.model.Answer;
 import guru.springframework.springaiintro.model.Capital;
 import guru.springframework.springaiintro.model.GetCapitalRequest;
@@ -21,21 +23,26 @@ public class QuestionController {
     }
 
     @PostMapping("/capitalJson")
-    public Answer getCapitalJson(@RequestBody Capital capital){
+    public Answer getCapitalJson(@RequestBody Capital capital) throws IOException {
         return openAIService.getCapitalJsonFormat(capital);
     }
     @PostMapping("/capitalWithInfo")
-    public Answer getCapitalWithInfo(@RequestBody GetCapitalRequest getCapitalRequest) {
+    public Answer getCapitalWithInfo(@RequestBody GetCapitalRequest getCapitalRequest) throws IOException {
         return this.openAIService.getCapitalWithInfo(getCapitalRequest);
     }
 
     @PostMapping("/capital")
-    public Answer getCapital(@RequestBody GetCapitalRequest getCapitalRequest) {
+    public Answer getCapital(@RequestBody GetCapitalRequest getCapitalRequest) throws IOException {
         return this.openAIService.getCapital(getCapitalRequest);
     }
 
     @PostMapping("/ask")
     public Answer askQuestion(@RequestBody Question question) {
         return openAIService.getAnswer(question);
+    }
+
+    @PostMapping("/")
+    public String askQuestion(@RequestBody String getRequest){
+        return openAIService.getAnswer(getRequest);
     }
 }
