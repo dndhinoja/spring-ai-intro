@@ -8,6 +8,8 @@ import guru.springframework.springaiintro.model.Answer;
 import guru.springframework.springaiintro.model.Capital;
 import guru.springframework.springaiintro.model.CapitalRequest;
 import guru.springframework.springaiintro.model.CapitalResposeRecord;
+import guru.springframework.springaiintro.model.DestinationInfoResponse;
+import guru.springframework.springaiintro.model.DestinationRequest;
 import guru.springframework.springaiintro.model.GetCapitalRequest;
 import guru.springframework.springaiintro.model.Question;
 
@@ -15,6 +17,8 @@ import guru.springframework.springaiintro.model.Question;
  * Created by jt, Spring Framework Guru.
  */
 public interface OpenAIService {
+
+    DestinationInfoResponse travellingDetailsByDestination(DestinationRequest destinationRequest);
 
     CapitalResposeRecord getCapitalInJsonBean(CapitalRequest capitalRequest) throws JsonProcessingException;
 

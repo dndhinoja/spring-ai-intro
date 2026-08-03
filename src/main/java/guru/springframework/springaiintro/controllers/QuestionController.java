@@ -6,6 +6,8 @@ import guru.springframework.springaiintro.model.Answer;
 import guru.springframework.springaiintro.model.Capital;
 import guru.springframework.springaiintro.model.CapitalRequest;
 import guru.springframework.springaiintro.model.CapitalResposeRecord;
+import guru.springframework.springaiintro.model.DestinationInfoResponse;
+import guru.springframework.springaiintro.model.DestinationRequest;
 import guru.springframework.springaiintro.model.GetCapitalRequest;
 import guru.springframework.springaiintro.model.Question;
 import guru.springframework.springaiintro.services.OpenAIService;
@@ -53,8 +55,8 @@ public class QuestionController {
         return openAIService.getAnswer(getRequest);
     }
 
-//    @PostMapping("/travellingDestinationOfferInfo")
-//    public DesinationInfoResponse getTravellingDestinationOffer(@RequestBody DestinationInfoRequest destinationInfoRequest){
-//
-//    }
+    @PostMapping("/destinationDetails")
+    public DestinationInfoResponse getTravellingDestinationOffer(@RequestBody DestinationRequest destinationInfoRequest){
+        return openAIService.travellingDetailsByDestination(destinationInfoRequest);
+    }
 }

@@ -21,6 +21,8 @@ import guru.springframework.springaiintro.model.Answer;
 import guru.springframework.springaiintro.model.Capital;
 import guru.springframework.springaiintro.model.CapitalRequest;
 import guru.springframework.springaiintro.model.CapitalResposeRecord;
+import guru.springframework.springaiintro.model.DestinationInfoResponse;
+import guru.springframework.springaiintro.model.DestinationRequest;
 import guru.springframework.springaiintro.model.GetCapitalRequest;
 import guru.springframework.springaiintro.model.Question;
 
@@ -44,8 +46,25 @@ public class OllamaServiceImpl implements OpenAIService{
     @Value("classpath:templates/get-capital-prompt-json-bean.st")
     private Resource getCapitalPromptJsonBean;
 
+    @Value("classpath:templates/get-travelling-details-prompt.st")
+    private Resource getTravellingDetailsPrompt;
+
     @Autowired
     ObjectMapper objectMapper;
+
+    @Override
+    public DestinationInfoResponse travellingDetailsByDestination(DestinationRequest destinationRequest){
+        BeanOutputConverter<DestinationInfoResponse> beanOutputConverter = new BeanOutputConverter<>(DestinationInfoResponse.class);
+        String format = beanOutputConverter.getFormat();
+
+        PromptTemplate promptTemplate = new PromptTemplate(getTravellingDetailsPrompt);
+        Prompt prompt = promptTemplate.create(Map.of("destination", destinationRequest.destinationName(),
+                    "format", format));
+
+        ChatResponse chatResponse = chatModel.call(prompt);
+        return beanOutputConverter.convert(
+                    Objects.requireNonNull(chatResponse.getResult().getOutput().getText()));
+    }
 
     @Override
     public CapitalResposeRecord getCapitalInJsonBean(CapitalRequest capitalRequest) {
